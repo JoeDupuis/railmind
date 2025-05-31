@@ -3,11 +3,16 @@ class RunsController < ApplicationController
 
   def create
     @run = @task.runs.build(run_params)
-    if @run.save
-      RunJob.perform_later(@run.id)
-      redirect_to project_task_path(@project, @task), notice: "Run started successfully."
-    else
-      redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}"
+
+    respond_to do |format|
+      if @run.save
+        RunJob.perform_later(@run.id)
+        format.turbo_stream
+        format.html { redirect_to project_task_path(@project, @task), notice: "Run started successfully." }
+      else
+        format.turbo_stream { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
+        format.html { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
+      end
     end
   end
 

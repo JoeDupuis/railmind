@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["textarea"]
+  static targets = ["textarea", "form"]
 
   keydown(event) {
     if (event.key === "Enter") {
@@ -19,5 +19,9 @@ export default class extends Controller {
     if (form) {
       form.requestSubmit()
     }
+  }
+
+  clearForm() {
+    this.textareaTarget.value = ""
   }
 }

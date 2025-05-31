@@ -1,0 +1,16 @@
+<%= form_with model: [@project, @task, run], url: project_task_runs_path(@project, @task), id: "run-form", data: { controller: "prompt", action: "turbo:submit-end->prompt#clearForm" } do |form| %>
+  <div>
+    <%= form.label :prompt %><br>
+    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    <% if run.errors.any? %>
+      <div style="color: red;">
+        <% run.errors.full_messages.each do |message| %>
+          <div><%= message %></div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  <div>
+    <%= form.submit "Run" %>
+  </div>
+<% end %>

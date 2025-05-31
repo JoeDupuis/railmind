@@ -14,22 +14,18 @@
     </div>
   <% end %>
   <%= turbo_stream_from @task %>
-  <% @runs.each do |run| %>
-    <%= render "tasks/run", run: run %>
-  <% end %>
+  <div id="runs-list">
+    <% @runs.each do |run| %>
+      <%= render "tasks/run", run: run %>
+    <% end %>
+  </div>
 <% else %>
-  <p>No runs yet.</p>
+  <div id="runs-list">
+    <p>No runs yet.</p>
+  </div>
 <% end %>
 
 <h2>New Run</h2>
-<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
-  <div>
-    <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
-  </div>
-  <div>
-    <%= form.submit "Run" %>
-  </div>
-<% end %>
+<%= render "run_form", task: @task, project: @project, run: Run.new %>
 
 <%= link_to 'Back', project_tasks_path(@project) %>
