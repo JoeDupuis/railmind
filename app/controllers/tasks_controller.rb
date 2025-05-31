@@ -1,9 +1,17 @@
 class TasksController < ApplicationController
-  before_action :set_project
+  before_action :set_project, only: [], if: -> { params[:project_id].present? }
   before_action :set_task, only: :show
 
   def index
-    @tasks = @project.tasks.includes(:agent)
+    if params[:project_id].present?
+      @project = Project.find(params[:project_id])
+      @tasks = @project.tasks.includes(:agent, :project)
+    else
+      @tasks = Task.includes(:agent, :project).order(created_at: :desc)
+      @task = Task.new
+      @projects = Project.all
+      @agents = Agent.all
+    end
   end
 
   def show
@@ -16,33 +24,53 @@ class TasksController < ApplicationController
   end
 
   def new
+    @project = Project.find(params[:project_id])
     @task = @project.tasks.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
   end
 
   def create
-    @task = @project.tasks.new(task_params)
+    if params[:project_id].present?
+      @project = Project.find(params[:project_id])
+      @task = @project.tasks.new(task_params)
+      redirect_path = [ @project, @task ]
+    else
+      @task = Task.new(task_params)
+      redirect_path = @task
+    end
+
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
-      redirect_to [ @project, @task ], notice: "Task was successfully launched."
+      redirect_to redirect_path, notice: "Task was successfully launched."
     else
-      render :new, status: :unprocessable_entity
+      if params[:project_id].present?
+        render :new, status: :unprocessable_entity
+      else
+        @tasks = Task.includes(:agent, :project).order(created_at: :desc)
+        @projects = Project.all
+        @agents = Agent.all
+        render :index, status: :unprocessable_entity
+      end
     end
   end
 
   private
 
   def set_project
-    @project = Project.find(params[:project_id])
+    @project = Project.find(params[:project_id]) if params[:project_id].present?
   end
 
   def set_task
-    @task = @project.tasks.find(params[:id])
+    if params[:project_id].present?
+      @task = Project.find(params[:project_id]).tasks.find(params[:id])
+    else
+      @task = Task.find(params[:id])
+    end
   end
 
   def task_params
-    params.require(:task).permit(:agent_id)
+    params.require(:task).permit(:agent_id, :project_id)
   end
 end

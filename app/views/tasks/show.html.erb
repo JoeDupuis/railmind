@@ -1,15 +1,49 @@
 <h1>Task <%= @task.id %></h1>
 
 <p>Agent: <%= @task.agent.name %></p>
+<% if @task.project %>
+  <p>Project: <%= @task.project.name %></p>
+<% end %>
+
+<h2>New Run</h2>
+<% if @task.project %>
+  <%= form_with model: [@task.project, @task, Run.new], url: project_task_runs_path(@task.project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
+    <div>
+      <%= form.label :prompt %><br>
+      <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    </div>
+    <div>
+      <%= form.submit "Run" %>
+    </div>
+  <% end %>
+<% else %>
+  <%= form_with model: [@task, Run.new], url: task_runs_path(@task), data: { turbo: false, controller: "prompt" } do |form| %>
+    <div>
+      <%= form.label :prompt %><br>
+      <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    </div>
+    <div>
+      <%= form.submit "Run" %>
+    </div>
+  <% end %>
+<% end %>
 
 <h2>Runs</h2>
 <% if @task.runs.any? %>
   <% if @task.runs.count > 1 %>
     <div style="margin-bottom: 15px;">
       <% if @show_all_runs %>
-        <%= link_to "Show Last Run Only", project_task_path(@project, @task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% if @task.project %>
+          <%= link_to "Show Last Run Only", project_task_path(@task.project, @task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% else %>
+          <%= link_to "Show Last Run Only", task_path(@task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% end %>
       <% else %>
-        <%= link_to "Show All Runs", project_task_path(@project, @task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% if @task.project %>
+          <%= link_to "Show All Runs", project_task_path(@task.project, @task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% else %>
+          <%= link_to "Show All Runs", task_path(@task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+        <% end %>
       <% end %>
     </div>
   <% end %>
@@ -21,15 +55,8 @@
   <p>No runs yet.</p>
 <% end %>
 
-<h2>New Run</h2>
-<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
-  <div>
-    <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
-  </div>
-  <div>
-    <%= form.submit "Run" %>
-  </div>
+<% if @task.project %>
+  <%= link_to 'Back', project_tasks_path(@task.project) %>
+<% else %>
+  <%= link_to 'Back', tasks_path %>
 <% end %>
-
-<%= link_to 'Back', project_tasks_path(@project) %>

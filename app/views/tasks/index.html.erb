@@ -1,14 +1,66 @@
-<h1>Tasks</h1>
+<% if @project %>
+  <h1>Tasks for <%= @project.name %></h1>
+  
+  <%= link_to 'New Task', new_project_task_path(@project) %>
+  
+  <ul>
+    <% @tasks.each do |task| %>
+      <li>
+        <%= link_to "Task ##{task.id}", project_task_path(@project, task) %> -
+        <%= task.agent.name %>
+      </li>
+    <% end %>
+  </ul>
+  
+  <%= link_to 'Back', project_path(@project) %>
+<% else %>
+  <h1>Dashboard</h1>
+  
+  <%= form_with(model: @task, local: true) do |form| %>
+    <% if @task.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(@task.errors.count, "error") %> prohibited this task from being saved:</h2>
+        <ul>
+          <% @task.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
 
-<%= link_to 'New Task', new_project_task_path(@project) %>
+    <div>
+      <%= form.label :project_id, "Project" %><br>
+      <%= form.collection_select :project_id, @projects, :id, :name, { prompt: "Select a project" } %>
+    </div>
 
-<ul>
-  <% @tasks.each do |task| %>
-    <li>
-      <%= link_to "Task ##{task.id}", project_task_path(@project, task) %> -
-      <%= task.agent.name %>
-    </li>
+    <div>
+      <%= form.label :agent_id, "Agent" %><br>
+      <%= form.collection_select :agent_id, @agents, :id, :name, { prompt: "Select an agent" } %>
+    </div>
+
+    <div data-controller="prompt">
+      <%= form.label :prompt %><br>
+      <%= form.text_area :prompt, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    </div>
+
+    <div>
+      <%= form.submit "Launch Task" %>
+    </div>
   <% end %>
-</ul>
 
-<%= link_to 'Back', project_path(@project) %>
+  <h2>Recent Tasks</h2>
+  <ul>
+    <% @tasks.each do |task| %>
+      <li>
+        <%= link_to "Task ##{task.id}", task_path(task) %> -
+        <%= task.agent.name %> in <%= task.project.name %>
+        (<%= task.created_at.strftime("%m/%d %H:%M") %>)
+      </li>
+    <% end %>
+  </ul>
+
+  <p>
+    <%= link_to 'Projects', projects_path %> |
+    <%= link_to 'Agents', agents_path %>
+  </p>
+<% end %>

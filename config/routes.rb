@@ -7,6 +7,9 @@ Rails.application.routes.draw do
       resources :runs, only: %i[create]
     end
   end
+  resources :tasks, only: %i[index create show] do
+    resources :runs, only: %i[create]
+  end
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
 
@@ -20,5 +23,5 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  root "dashboard#index"
+  root "tasks#index"
 end
