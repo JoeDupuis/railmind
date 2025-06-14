@@ -8,10 +8,15 @@ class TasksController < ApplicationController
 
   def show
     @show_all_runs = params[:show_all_runs] == "true"
+    @selected_run = if params[:selected_run_id].present?
+      @task.runs.find_by(id: params[:selected_run_id])
+    else
+      @task.runs.order(created_at: :desc).first
+    end
     if @show_all_runs
       @runs = @task.runs.includes(steps: :repo_states).order(created_at: :asc)
     else
-      @runs = @task.runs.includes(steps: :repo_states).order(created_at: :desc).limit(1)
+      @runs = @selected_run ? [ @selected_run ] : []
     end
   end
 

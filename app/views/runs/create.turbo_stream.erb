@@ -1,1 +1,2 @@
-<%= turbo_stream.append "runs-list", partial: "tasks/run", locals: { run: @run } %>
+<%= turbo_stream.replace "runs-list", partial: "tasks/runs_list", locals: { runs: [@run] } %>
+<%= turbo_stream.replace "chat-messages", partial: "tasks/chat_messages", locals: { runs: @run.task.runs.order(:created_at) } %>

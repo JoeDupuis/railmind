@@ -1,0 +1,7 @@
+<div class="chat-panel">
+  <%= render "tasks/chat_messages", runs: runs %>
+  <%= render "tasks/run_form", task: task, run: Run.new %>
+  <% if Current.user&.github_token.present? %>
+    <%= render "tasks/auto_push_form", task: task %>
+  <% end %>
+</div>

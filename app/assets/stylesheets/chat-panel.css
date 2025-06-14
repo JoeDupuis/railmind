@@ -1,0 +1,28 @@
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#chat-messages {
+  flex: 1;
+}
+
+.chat-item {
+  margin-bottom: 10px;
+}
+
+.chat-item > .user-message,
+.chat-item > .assistant-message {
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.chat-item > .user-message {
+  background: #e6f2ff;
+}
+
+.chat-item > .assistant-message {
+  background: #f0f0f0;
+}

@@ -1,4 +1,5 @@
 class Run < ApplicationRecord
+  include ActionView::RecordIdentifier
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
   has_many :steps, -> { order(:id) }, dependent: :destroy
@@ -6,6 +7,8 @@ class Run < ApplicationRecord
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 
   after_update_commit :broadcast_update
+  after_create_commit :broadcast_chat_append
+  after_update_commit :broadcast_chat_replace
 
   def first_run?
     siblings.where.not(id: id).none?
@@ -56,6 +59,14 @@ class Run < ApplicationRecord
 
   def broadcast_update
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+  end
+
+  def broadcast_chat_append
+    broadcast_append_to(task, target: "chat-messages", partial: "runs/chat_item", locals: { run: self })
+  end
+
+  def broadcast_chat_replace
+    broadcast_replace_later_to(task, target: dom_id(self, :chat_item), partial: "runs/chat_item", locals: { run: self })
   end
 
   def broadcast_refresh_auto_push_form

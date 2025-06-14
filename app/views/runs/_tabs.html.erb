@@ -1,7 +1,10 @@
 <% repo_states = run.repo_states %>
 <div data-controller="tabs" class="tabs-container">
   <div class="nav">
-    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
+    <% if local_assigns[:show_chat] %>
+      <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
+    <% end %>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Log</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="raw" class="tab">Raw</button>
     <% repo_states.each_with_index do |repo_state, index| %>
       <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff-<%= index %>" class="tab">
@@ -10,6 +13,14 @@
     <% end %>
   </div>
   <div class="content">
+    <% if local_assigns[:show_chat] %>
+      <div data-tabs-target="panel" data-panel-id="chat" class="panel chat-panel-tab">
+        <div class="output">
+          <% chat_runs = run.task.runs.includes(:steps).order(created_at: :asc) %>
+          <%= render "tasks/chat_panel", task: run.task, runs: chat_runs %>
+        </div>
+      </div>
+    <% end %>
     <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
       <div class="output">
         <%= render run.steps %>

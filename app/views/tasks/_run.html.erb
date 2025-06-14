@@ -8,13 +8,8 @@
       | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
     <% end %>
   </p>
-  <div class="prompt" data-controller="prompt-truncate" data-prompt-truncate-max-length-value="200">
-    <strong>Prompt:</strong> 
-    <span data-prompt-truncate-target="content"><%= run.prompt %></span>
-    <button data-prompt-truncate-target="toggle" data-action="click->prompt-truncate#toggle" class="prompt-toggle" style="display: none;">Show more</button>
-  </div>
   <% if run.steps.any? %>
-    <%= render "runs/tabs", run: run %>
+    <%= render "runs/tabs", run: run, show_chat: local_assigns[:show_chat] %>
   <% elsif run.status == 'running' %>
     <p class="title">Output:</p>
     <div class="run-spinner">

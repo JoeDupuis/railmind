@@ -1,0 +1,40 @@
+.codex-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.codex-layout > .chat-panel {
+  width: 40%;
+}
+
+.codex-layout > .log-panel {
+  width: 60%;
+}
+
+@media (max-width: 768px) {
+  .codex-layout {
+    flex-direction: column;
+  }
+
+  .codex-layout > .chat-panel {
+    display: none;
+  }
+
+  .chat-tab {
+    display: inline-block;
+  }
+
+  .chat-panel-tab {
+    display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  .chat-tab {
+    display: none;
+  }
+
+  .chat-panel-tab {
+    display: none;
+  }
+}
