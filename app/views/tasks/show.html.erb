@@ -22,6 +22,9 @@
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
         <% end %>
+        <% if @task.project.dev_dockerfile.present? %>
+          <%= render "tasks/docker_controls", task: @task %>
+        <% end %>
       </div>
     </div>
   </div>

@@ -14,6 +14,10 @@ Rails.application.routes.draw do
       member do
         get :branches
         patch :update_auto_push
+        post :build_and_run_container
+        post :stop_container
+        post :restart_container
+        delete :remove_container
       end
       resources :runs, only: %i[create]
     end

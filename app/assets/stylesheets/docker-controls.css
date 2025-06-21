@@ -1,0 +1,29 @@
+.docker-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.docker-controls .container-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.docker-controls .container-status {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.docker-controls .button.-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.docker-controls .button.-danger:hover {
+  background-color: var(--color-danger-hover);
+}

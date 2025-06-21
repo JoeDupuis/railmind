@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_183801) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -49,6 +49,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
     t.string "repo_path"
+    t.text "dev_dockerfile"
+    t.integer "dev_container_port", default: 3000
     t.index ["discarded_at"], name: "index_projects_on_discarded_at"
   end
 
@@ -125,6 +127,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
     t.boolean "auto_push_enabled", default: false, null: false
     t.string "auto_push_branch"
     t.string "description"
+    t.string "container_id"
+    t.string "container_name"
+    t.string "container_status"
+    t.string "docker_image_id"
+    t.integer "container_host_port"
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
     t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"

@@ -29,6 +29,18 @@
   </div>
 
   <div>
+    <%= form.label :dev_dockerfile, "Development Dockerfile" %><br>
+    <%= form.text_area :dev_dockerfile, rows: 10, placeholder: "# Optional: Custom Dockerfile for development containers" %>
+    <small class="form-help">Define a custom Dockerfile for development containers spawned from tasks</small>
+  </div>
+
+  <div>
+    <%= form.label :dev_container_port, "Container Port" %><br>
+    <%= form.number_field :dev_container_port, placeholder: "3000" %>
+    <small class="form-help">Container port to publish. Docker will assign an available host port automatically (default: 3000)</small>
+  </div>
+
+  <div>
     <%= form.label :secrets, "Secrets (JSON)" %><br>
     <%= text_area_tag "project[secrets]", "", placeholder: '{"ENV_VAR": "value", "API_KEY": "secret"}', rows: 3 %>
     <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>

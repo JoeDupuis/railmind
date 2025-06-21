@@ -29,6 +29,18 @@
   </div>
 
   <div>
+    <%= form.label :dev_dockerfile, "Development Dockerfile" %><br>
+    <%= form.text_area :dev_dockerfile, rows: 10, placeholder: "# Optional: Custom Dockerfile for development containers" %>
+    <small class="form-help">Define a custom Dockerfile for development containers spawned from tasks</small>
+  </div>
+
+  <div>
+    <%= form.label :dev_container_port, "Container Port" %><br>
+    <%= form.number_field :dev_container_port, placeholder: "3000" %>
+    <small class="form-help">Container port to publish. Docker will assign an available host port automatically (default: 3000)</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

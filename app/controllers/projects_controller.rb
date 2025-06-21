@@ -43,7 +43,7 @@ class ProjectsController < ApplicationController
   private
 
   def project_params
-    params.require(:project).permit(:name, :description, :repository_url, :setup_script, :repo_path)
+    params.require(:project).permit(:name, :description, :repository_url, :setup_script, :repo_path, :dev_dockerfile, :dev_container_port)
   end
 
   def update_project_secrets

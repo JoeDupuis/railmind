@@ -1,0 +1,36 @@
+<div id="docker_controls" class="docker-controls">
+  <% if task.container_id.present? %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: <%= task.container_name %> (<%= task.container_status %>)
+        <% if task.project.dev_container_port.present? && task.container_id.present? %>
+          <% begin %>
+            <% container = Docker::Container.get(task.container_id) %>
+            <% port_mapping = container.json["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"] %>
+            <% if port_mapping && port_mapping.first %>
+              | Port: <%= link_to "localhost:#{port_mapping.first['HostPort']}", "http://localhost:#{port_mapping.first['HostPort']}", target: "_blank" %>
+            <% else %>
+              | Port: <%= task.project.dev_container_port %> (not mapped)
+            <% end %>
+          <% rescue => e %>
+            | Port: <%= task.project.dev_container_port %>
+          <% end %>
+        <% end %>
+      </span>
+      <%= link_to "Stop", stop_container_task_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini -danger" %>
+      <%= link_to "Restart", restart_container_task_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini" %>
+      <%= link_to "Remove", remove_container_task_path(task), 
+          data: { turbo_method: :delete, turbo_confirm: "Remove container?" },
+          class: "button action-button -mini -danger" %>
+    </div>
+  <% else %>
+    <%= link_to "Build & Run Container", build_and_run_container_task_path(task), 
+        data: { turbo_method: :post },
+        class: "button action-button -primary -mini",
+        title: "Build and run a development container with the project's Dockerfile" %>
+  <% end %>
+</div>
