@@ -118,7 +118,10 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
-    env_vars = agent.env_strings + project_env_strings
+    env_vars = agent.env_strings + project_env_strings + [
+      "TASK_ID=#{task.id}",
+      "RUN_ID=#{id}"
+    ]
 
     Docker::Container.create(
       "Image" => agent.docker_image,
@@ -158,6 +161,15 @@ class Run < ApplicationRecord
     if user.ssh_key.present? && agent.ssh_mount_path.present?
       archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
     end
+
+    # Write task info file
+    task_info = {
+      task_id: task.id,
+      run_id: id,
+      project_name: task.project.name,
+      agent_name: task.agent.name
+    }.to_json
+    archive_file_to_container(container, task_info, "/tmp/summoncircle_task_info.json")
   end
 
 
