@@ -8,9 +8,17 @@ module GitOperations
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url
 
+    Rails.logger.info "Clone repository - URL: #{repository_url.inspect}, Branch: #{task.target_branch.inspect}"
     validate_ssh_setup!(task, repository_url)
 
-    command = "git clone #{repository_url} #{clone_target}"
+    if task.target_branch.present?
+      command = "git clone -b '#{task.target_branch}' '#{repository_url}' '#{clone_target}'"
+    else
+      # Clone without specifying branch, then detect and save the default branch
+      command = "git clone '#{repository_url}' '#{clone_target}'"
+    end
+
+    Rails.logger.info "Clone command: #{command}"
 
     run_git_command(
       task: task,
@@ -19,6 +27,31 @@ module GitOperations
       error_message: "Failed to clone repository",
       skip_repo_path: true  # Clone operates from workspace root
     )
+
+    # If target_branch was nil, detect and save the default branch
+    if task.target_branch.blank?
+      detect_and_save_default_branch(task)
+    end
+  end
+
+  def detect_and_save_default_branch(task)
+    begin
+      # Get the current branch name (which will be the default after clone)
+      logs = run_git_command(
+        task: task,
+        command: "git branch --show-current",
+        error_message: "Failed to detect current branch",
+        return_logs: true
+      )
+
+      default_branch = logs.strip
+      if default_branch.present?
+        task.update_column(:target_branch, default_branch)
+        Rails.logger.info "Set target_branch to detected default: #{default_branch}"
+      end
+    rescue => e
+      Rails.logger.error "Failed to detect default branch: #{e.message}"
+    end
   end
 
   def push_changes_to_branch(commit_message = nil)
@@ -45,6 +78,8 @@ module GitOperations
     )
   end
 
+
+
   def fetch_branches(task = nil)
     task ||= self.is_a?(Task) ? self : self.task
     return [] unless task.project.repository_url.present?
@@ -56,7 +91,12 @@ module GitOperations
         error_message: "Failed to fetch branches",
         return_logs: true
       )
-      branches = logs.split("\n").map { |line| line.strip.gsub(/^\* /, "") }.reject(&:blank?)
+
+      branches = logs.lines.map do |line|
+        # Remove the * for current branch and any whitespace
+        line.strip.sub(/^\*\s*/, "")
+      end.reject(&:blank?)
+
       branches.presence || []
     rescue => e
       Rails.logger.error "Failed to fetch branches: #{e.message}"
@@ -79,7 +119,24 @@ module GitOperations
         error_message: "Failed to capture git diff",
         return_logs: true
       )
-      return nil if diff_output.blank?
+
+      target_branch_diff = nil
+      if task.target_branch.present?
+        begin
+          target_command = "git fetch origin #{task.target_branch} && git diff origin/#{task.target_branch}...HEAD --unified=10"
+          target_branch_diff = run_git_command(
+            task: task,
+            command: target_command,
+            error_message: "Failed to capture target branch diff",
+            return_logs: true
+          )
+        rescue => e
+          Rails.logger.error "Failed to capture target branch diff: #{e.message}"
+        end
+      end
+
+      # Return early only if both diffs are empty
+      return nil if diff_output.blank? && target_branch_diff.blank?
 
       repo_path = project.repo_path.presence || ""
       working_dir = task.workplace_mount.container_path
@@ -88,11 +145,12 @@ module GitOperations
       repo_state_step = run.steps.create!(
         raw_response: "Repository state captured",
         type: "Step::System",
-        content: "Repository state captured\n\nUncommitted diff:\n#{diff_output}"
+        content: "Repository state captured"
       )
 
       repo_state_step.repo_states.create!(
         uncommitted_diff: diff_output,
+        target_branch_diff: target_branch_diff,
         repository_path: git_working_dir
       )
     rescue => e

@@ -4,13 +4,9 @@
   background-color: var(--surface-secondary);
   border-radius: 4px;
   border: 1px solid var(--border);
-}
-
-@media (prefers-color-scheme: dark) {
-  .diff-controls {
-    background-color: #2d2d2d;
-    border-color: #404040;
-  }
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .diff-toggle {
@@ -21,12 +17,6 @@
   color: var(--text);
 }
 
-@media (prefers-color-scheme: dark) {
-  .diff-toggle {
-    color: #e6e6e6;
-  }
-}
-
 .diff-toggle input[type="checkbox"] {
   margin: 0;
   cursor: pointer;
@@ -35,4 +25,23 @@
 .diff-toggle-label {
   cursor: pointer;
   user-select: none;
+}
+
+.diff-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.diff-select:hover {
+  border-color: var(--border-hover);
+}
+
+.diff-select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

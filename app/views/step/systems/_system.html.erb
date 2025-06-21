@@ -1,8 +1,4 @@
 <div class="system-step">
   <strong class="label">🔧 System</strong>
-  <% if system.content&.include?("Repository state captured") && system.content&.include?("Uncommitted diff:") %>
-    <p class="message">Repository state captured</p>
-  <% else %>
-    <pre class="content"><%= system.content %></pre>
-  <% end %>
+  <pre class="content"><%= system.content %></pre>
 </div>

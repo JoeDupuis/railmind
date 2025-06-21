@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     end
   end
   resources :projects do
+    resources :project_branches, only: %i[index]
     resources :tasks, shallow: true do
       member do
         get :branches

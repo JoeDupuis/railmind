@@ -230,6 +230,6 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "##{dom_id(run)}"
     assert_select "[data-controller='diff']"
     # Check that the diff text is properly escaped
-    assert_match(/data-diff-diff-text-value/, response.body)
+    assert_match(/data-diff-uncommitted-diff-value/, response.body)
   end
 end

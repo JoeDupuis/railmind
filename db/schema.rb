@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_075133) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -125,6 +125,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
     t.boolean "auto_push_enabled", default: false, null: false
     t.string "auto_push_branch"
     t.string "description"
+    t.string "target_branch"
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
     t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"

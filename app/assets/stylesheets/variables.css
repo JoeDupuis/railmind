@@ -6,5 +6,22 @@
   --color-primary-hover: #0052cc;
   --color-primary-dark: #2563eb;
   --color-primary-dark-hover: #1d4ed8;
+  --surface: white;
+  --surface-secondary: #f5f5f5;
+  --text: #1a1a1a;
+  --text-secondary: #666;
+  --border: #ddd;
+  --border-hover: #bbb;
   --spacing-sm: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1e1e1e;
+    --surface-secondary: #2d2d2d;
+    --text: #e6e6e6;
+    --text-secondary: #b3b3b3;
+    --border: #404040;
+    --border-hover: #555;
+  }
 }

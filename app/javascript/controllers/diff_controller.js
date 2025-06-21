@@ -1,24 +1,37 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["output", "viewToggle"]
+  static targets = ["output", "viewToggle", "diffSelect", "shadowContent"]
   static values = {
-    diffText: String
+    uncommittedDiff: String,
+    targetBranchDiff: String,
+    hasTargetBranch: Boolean
   }
 
   connect() {
     this.outputFormat = 'side-by-side'
+    this.currentDiffType = 'uncommitted'
     // Ensure the shadow root is available
     this.ensureShadowRoot()
-    if (this.hasDiffTextValue && this.diffTextValue.trim()) {
+    
+    // If there's only a target branch diff and no uncommitted diff, switch to target branch view
+    if (this.hasTargetBranchValue && this.targetBranchDiffValue && !this.uncommittedDiffValue.trim()) {
+      this.currentDiffType = 'target-branch'
+      if (this.hasDiffSelectTarget) {
+        this.diffSelectTarget.value = 'target-branch'
+      }
+    }
+    
+    // Render if we have any diff
+    if ((this.hasUncommittedDiffValue && this.uncommittedDiffValue.trim()) ||
+        (this.hasTargetBranchValue && this.targetBranchDiffValue.trim())) {
       this.render()
     }
   }
 
-  diffTextValueChanged() {
-    if (this.diffTextValue.trim()) {
-      this.render()
-    }
+  switchDiff(event) {
+    this.currentDiffType = event.target.value
+    this.render()
   }
 
   toggleView() {
@@ -64,8 +77,16 @@ export default class extends Controller {
       return
     }
 
+    // Get the appropriate diff text based on current selection
+    let diffText = ''
+    if (this.currentDiffType === 'target-branch' && this.hasTargetBranchDiffValue) {
+      diffText = this.targetBranchDiffValue
+    } else if (this.hasUncommittedDiffValue) {
+      diffText = this.uncommittedDiffValue
+    }
+
     // Create Diff2HtmlUI instance targeting the shadow DOM container
-    const diff2htmlUi = new Diff2HtmlUI(contentContainer, this.diffTextValue, {
+    const diff2htmlUi = new Diff2HtmlUI(contentContainer, diffText, {
       drawFileList: true,
       fileListToggle: true,
       fileListStartVisible: false,

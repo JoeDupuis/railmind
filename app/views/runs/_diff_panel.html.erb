@@ -1,5 +1,14 @@
-<div data-controller="diff" data-diff-diff-text-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>">
+<div data-controller="diff" 
+     data-diff-uncommitted-diff-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>"
+     data-diff-target-branch-diff-value="<%= repo_state.target_branch_diff.to_s.gsub('"', '&quot;') %>"
+     data-diff-has-target-branch-value="<%= repo_state.target_branch_diff.present? %>">
   <div class="diff-controls">
+    <% if repo_state.target_branch_diff.present? %>
+      <select data-action="change->diff#switchDiff" data-diff-target="diffSelect" class="diff-select">
+        <option value="uncommitted">Working Changes</option>
+        <option value="target-branch">Changes from Base Branch</option>
+      </select>
+    <% end %>
     <label class="diff-toggle">
       <input type="checkbox" data-action="change->diff#toggleView" data-diff-target="viewToggle" checked>
       <span class="diff-toggle-label">Side by Side</span>

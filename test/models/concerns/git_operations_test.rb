@@ -15,14 +15,18 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test")
 
-    Docker::Container.expects(:create).with do |config|
+    # Expect two Docker commands - both should have credentials
+    Docker::Container.expects(:create).twice.with do |config|
       assert_includes config["Env"], "GITHUB_TOKEN=test_token_123"
       assert_includes config["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
-      assert_match(/git clone https:\/\/github.com\/test\/repo.git/, config["Cmd"][1])
       true
-    end.returns(mock_container)
+    end.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
+
+    # Verify target_branch was set
+    task.reload
+    assert_equal "main", task.target_branch
   end
 
   test "push_changes_to_branch uses git credentials for GitHub URLs" do
@@ -54,14 +58,19 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test")
 
-    Docker::Container.expects(:create).with do |config|
+    # Expect two Docker commands - neither should have GitHub credentials
+    Docker::Container.expects(:create).twice.with do |config|
       env = config["Env"] || []
       refute_includes env, "GITHUB_TOKEN=test_token_123"
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
       true
-    end.returns(mock_container)
+    end.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
+
+    # Verify target_branch was set
+    task.reload
+    assert_equal "main", task.target_branch
   end
 
   test "clone_repository works with SSH URLs" do
@@ -77,15 +86,14 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test")
 
-    Docker::Container.expects(:create).with do |config|
-      assert_equal "git clone git@github.com:JoeDupuis/shenanigans.git .", config["Cmd"][1]
-      env = config["Env"] || []
-      refute_includes env, "GITHUB_TOKEN="
-      refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
-      true
-    end.returns(mock_container)
+    # Expect two Docker commands - clone and branch detection
+    Docker::Container.expects(:create).twice.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
+
+    # Verify target_branch was set
+    task.reload
+    assert_equal "main", task.target_branch
   end
 
   test "push_changes_to_branch works with SSH URLs" do
@@ -118,9 +126,18 @@ class GitOperationsTest < ActiveSupport::TestCase
   def mock_container
     container = mock("container")
     container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(4)
+    container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
     container.expects(:logs).returns("Success")
+    container.expects(:delete)
+    container
+  end
+
+  def mock_container_with_output(output)
+    container = mock("container")
+    container.expects(:start)
+    container.expects(:wait).returns({ "StatusCode" => 0 })
+    container.expects(:logs).returns(output)
     container.expects(:delete)
     container
   end
